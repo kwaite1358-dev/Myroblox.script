@@ -1,0 +1,98 @@
+-- [[ KWAITE 1358 - EXCLUSIVE HUB ]]
+-- مخصص لماب Car Sales 2 (Mobile Version)
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 320, 0, 240)
+MainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255, 215, 0) -- ذهبي
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- العنوان باسمك
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.Text = "🌟 KWAITE 1358 HUB 🌟"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+
+local Content = Instance.new("ScrollingFrame", MainFrame)
+Content.Size = UDim2.new(1, -10, 1, -50)
+Content.Position = UDim2.new(0, 5, 0, 45)
+Content.BackgroundTransparency = 1
+Content.CanvasSize = UDim2.new(0, 0, 2, 0)
+Content.ScrollBarThickness = 2
+
+local function CreateBtn(name, color, callback)
+    local btn = Instance.new("TextButton", Content)
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.Position = UDim2.new(0, 5, 0, (#Content:GetChildren()-1) * 45)
+    btn.Text = name
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.MouseButton1Click:Connect(callback)
+end
+
+-- وظيفة الانتقال الآمن (Tween)
+local function SafeTP(target)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") and target then
+        local ts = game:GetService("TweenService")
+        local info = TweenInfo.new(1.5, Enum.EasingStyle.Linear)
+        local tween = ts:Create(char.HumanoidRootPart, info, {CFrame = target.CFrame + Vector3.new(0, 5, 0)})
+        tween:Play()
+    end
+end
+
+-- 1. ميزة الانتقال لأغلى سيارة
+CreateBtn("🚀 اذهب لأغلى سيارة معروضة", Color3.fromRGB(0, 80, 150), function()
+    local maxPrice = -1
+    local bestCar = nil
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChild("Stats") then
+            local p = v.Stats:FindFirstChild("Price")
+            if p and p.Value > maxPrice then
+                maxPrice = p.Value
+                bestCar = v
+            end
+        end
+    end
+    if bestCar then
+        SafeTP(bestCar.PrimaryPart or bestCar:FindFirstChildWhichIsA("BasePart"))
+    end
+end)
+
+-- 2. ميزة كاشف سيارات البيع
+CreateBtn("💰 كشف سيارات المعرض", Color3.fromRGB(0, 120, 0), function()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("VehicleSeat") and v.Parent and not v.Parent:FindFirstChild("Owner") then
+            if not v.Parent:FindFirstChild("KwaiteESP") then
+                local b = Instance.new("BillboardGui", v.Parent)
+                b.Name = "KwaiteESP"
+                b.AlwaysOnTop = true
+                b.Size = UDim2.new(0, 100, 0, 50)
+                local l = Instance.new("TextLabel", b)
+                l.Size = UDim2.new(1, 0, 1, 0)
+                l.Text = "سيارة بيع 💵"; l.TextColor3 = Color3.new(1,1,0); l.BackgroundTransparency = 1; l.TextScaled = true
+            end
+        end
+    end
+end)
+
+-- 3. ميزة سرعة المشي
+CreateBtn("⚡ سرعة المطور (100)", Color3.fromRGB(150, 0, 0), function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+end)
+
+-- زر الإغلاق
+local Cl = Instance.new("TextButton", MainFrame)
+Cl.Size = UDim2.new(0, 30, 0, 30)
+Cl.Position = UDim2.new(1, -35, 0, 5)
+Cl.Text = "X"; Cl.BackgroundColor3 = Color3.new(0.6,0,0); Cl.TextColor3 = Color3.new(1,1,1)
+Cl.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
